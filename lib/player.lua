@@ -1,7 +1,8 @@
+local anim8 = require 'vendor/anim8'
 
 -- Variables
 local canShoot = true
-local canShootTimerMax = 0.2
+local canShootTimerMax = 0.5
 local canShootTimer = canShootTimerMax
 
 
@@ -11,6 +12,7 @@ local bulletImg = nil
 -- Entities
 local bullets = {}
 
+-- Export Object
 player = {
   x = windowWidth/2 - 32,
   y = windowHeight - 100,
@@ -19,22 +21,29 @@ player = {
   width = 64,
   height = 64,
   img = nil,
-  sheet = nil
+  sheet = nil,
+  animation = nil
 }
-
-local bullets = {}
 
 
 -- Load
 function player.load()
   player.sheet = love.graphics.newImage('assets/player_full.png');
   player.img = love.graphics.newQuad(0, 0, 64, 64, player.sheet:getDimensions());
+
+  image = love.graphics.newImage('assets/enemy.png')
+
+  local g = anim8.newGrid(32, 32, image:getWidth(), image:getHeight())
+  animation = anim8.newAnimation(g('1-4',1), 0.1)
+
+
   bulletImg = love.graphics.newImage('assets/bullet.png')
 end
 
 
 -- Upate function
 function player.update(dt)
+  animation:update(dt)
 
   -- Move ship left/right inside window bounds
   if love.keyboard.isDown('left', 'a') then
@@ -71,13 +80,13 @@ end
 
 -- Draw
 function player.draw()
+  animation:draw(image, 100, 200)
 
   love.graphics.draw(player.sheet, player.img, player.x , player.y)
 
   for i, bullet in ipairs(bullets) do
     love.graphics.draw(bullet.img, bullet.x, bullet.y)
   end
-
 end
 
 
@@ -85,7 +94,7 @@ end
 -- Gameplay functions
 function player.shoot()
   -- Create new Bullet and insrt to table
-  newBullet = { x = player.x + (player.width/2), y = player.y, img = bulletImg }
+  newBullet = { x = player.x + (player.width/2 - 2), y = player.y + 10, img = bulletImg }
   table.insert(bullets, newBullet)
   canShoot = false
   canShootTimer = canShootTimerMax
