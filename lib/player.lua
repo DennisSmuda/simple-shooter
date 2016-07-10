@@ -5,7 +5,6 @@ local canShoot = true
 local canShootTimerMax = 0.5
 local canShootTimer = canShootTimerMax
 
-
 -- Assets
 local bulletImg = nil
 
@@ -16,26 +15,31 @@ local bullets = {}
 player = {
   x = windowWidth/2 - 32,
   y = windowHeight - 100,
-  speed = 200,
+  speed       = 200,
   bulletSpeed = 300,
-  width = 64,
-  height = 64,
-  img = nil,
-  sheet = nil,
-  animation = nil
+  width       = 64,
+  height      = 64,
+  direction   = nil,
+  img         = nil,
+  sheet       = nil,
+  grid        = nil,
+  animation   = nil,
+  leftAnimation  = nil,
+  rightAnimation = nil
 }
-
 
 -- Load
 function player.load()
-  player.sheet = love.graphics.newImage('assets/player_full.png');
-  player.img = love.graphics.newQuad(0, 0, 64, 64, player.sheet:getDimensions());
+  player.sheet          = love.graphics.newImage('assets/player_full.png')
+  player.grid           = anim8.newGrid(64, 64, player.sheet:getWidth(), player.sheet:getHeight())
+  player.animation      = anim8.newAnimation(player.grid('1-4', 1), 0.1)
+  player.leftAnimation  = anim8.newAnimation(player.grid('1-4', 2), 0.1)
+  player.rightAnimation = anim8.newAnimation(player.grid('1-4', 3), 0.1)
 
-  image = love.graphics.newImage('assets/enemy.png')
-
-  local g = anim8.newGrid(32, 32, image:getWidth(), image:getHeight())
+  -- anim test enemy
+  image     = love.graphics.newImage('assets/enemy.png')
+  local g   = anim8.newGrid(32, 32, image:getWidth(), image:getHeight())
   animation = anim8.newAnimation(g('1-4',1), 0.1)
-
 
   bulletImg = love.graphics.newImage('assets/bullet.png')
 end
@@ -44,6 +48,7 @@ end
 -- Upate function
 function player.update(dt)
   animation:update(dt)
+  player.animation:update(dt)
 
   -- Move ship left/right inside window bounds
   if love.keyboard.isDown('left', 'a') then
@@ -54,6 +59,8 @@ function player.update(dt)
     if player.x < (windowWidth - player.width) then
       player.moveRight(dt)
     end
+  else
+    player.direction = nil
   end
 
   -- Shot timeout tracker
@@ -78,34 +85,42 @@ function player.update(dt)
 
 end
 
+
 -- Draw
 function player.draw()
   animation:draw(image, 100, 200)
 
-  love.graphics.draw(player.sheet, player.img, player.x , player.y)
+  -- Use different animation based on flying direction
+  if player.direction == 'left' then
+    player.leftAnimation:draw(player.sheet, player.x, player.y)
+  elseif player.direction == 'right' then
+    player.rightAnimation:draw(player.sheet, player.x, player.y)
+  else
+    player.animation:draw(player.sheet, player.x, player.y)
+  end
 
+  -- Draw Bullets
   for i, bullet in ipairs(bullets) do
     love.graphics.draw(bullet.img, bullet.x, bullet.y)
   end
 end
 
 
-
 -- Gameplay functions
 function player.shoot()
-  -- Create new Bullet and insrt to table
+  -- Create new Bullet and insert to table
   newBullet = { x = player.x + (player.width/2 - 2), y = player.y + 10, img = bulletImg }
   table.insert(bullets, newBullet)
   canShoot = false
   canShootTimer = canShootTimerMax
 end
 
-
-
 function player.moveLeft(dt)
+  player.direction = 'left'
   player.x = player.x - (player.speed * dt)
 end
 
 function player.moveRight(dt)
+  player.direction = 'right'
   player.x = player.x + (player.speed * dt)
 end

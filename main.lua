@@ -6,11 +6,11 @@ windowWidth = love.graphics.getWidth()
 
 
 -- Imports
+require 'lib/world'
 require 'lib/player'
 
-
-
 function love.load()
+  World.load()
   player:load()
 end
 
@@ -20,10 +20,8 @@ function love.update(dt)
     love.event.push('quit')
   end
 
-
   -- update player
   player.update(dt)
-
 end
 
 function love.draw(dt)
