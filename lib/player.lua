@@ -35,19 +35,13 @@ function player.load()
   player.animation      = anim8.newAnimation(player.grid('1-4', 1), 0.1)
   player.leftAnimation  = anim8.newAnimation(player.grid('1-4', 2), 0.1)
   player.rightAnimation = anim8.newAnimation(player.grid('1-4', 3), 0.1)
-
-  -- anim test enemy
-  image     = love.graphics.newImage('assets/enemy.png')
-  local g   = anim8.newGrid(32, 32, image:getWidth(), image:getHeight())
-  animation = anim8.newAnimation(g('1-4',1), 0.1)
-
+  
   bulletImg = love.graphics.newImage('assets/bullet.png')
 end
 
 
 -- Upate function
 function player.update(dt)
-  animation:update(dt)
   player.animation:update(dt)
 
   -- Move ship left/right inside window bounds
@@ -88,7 +82,6 @@ end
 
 -- Draw
 function player.draw()
-  animation:draw(image, 100, 200)
 
   -- Use different animation based on flying direction
   if player.direction == 'left' then

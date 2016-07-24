@@ -6,24 +6,27 @@ windowWidth = love.graphics.getWidth()
 
 
 -- Imports
-require 'lib/world'
-require 'lib/player'
+Gamestate = require 'vendor/gamestate'
+
+require 'game'
+
+
+
+
+menu = {}
+
+function menu:draw()
+  love.graphics.print("Press enter", 10, 10)
+end
+
+function menu:keyreleased(key, code)
+  if key == 'return' then
+    Gamestate.switch(game)
+  end
+end
+
 
 function love.load()
-  World.load()
-  player:load()
-end
-
-function love.update(dt)
-  -- Exit game on Escape
-  if love.keyboard.isDown('escape') then
-    love.event.push('quit')
-  end
-
-  -- update player
-  player.update(dt)
-end
-
-function love.draw(dt)
-  player.draw()
+  Gamestate.registerEvents()
+  Gamestate.switch(menu)
 end
